@@ -1,45 +1,51 @@
-import java.util.List;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
+        // dependencies
+        ToDoManager todoManager = new SimpleToDoManager();
+        UserDetails user = new UserDetails("info@rcs.lv", "Kaspars", "Test");
+        
+        // app
+        AppControllor controllor = new SimpleAppController(todoManager, user);
+        try {
+            boolean result = controllor.signup(null, "", "");
+        } catch (SignUpException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+        
+        
+        File file = new File("test.txt");
 
-        UserService userService = new UserService();
+        // try this code
+        // catch errors
+        // always execute
 
-        UserDetails dummy = new UserDetails("kaspars@rcs.lv", "Kaspars", "RCS");
+        // other code
+        Scanner sc = null;
+        try {
+            FileInputStream in = new FileInputStream(file);
+            sc = new Scanner(System.in);
 
-        // C
-        userService.save(dummy);
+            // ok
+            // work with file if possible
 
-        // R
-        UserDetails dummyUserFromStorage = userService.get("kaspars@rcs.lv");
-
-        System.out.println("Expected 'Kaspars' " + dummyUserFromStorage.getFirstname()); // not working???
-        boolean passed = ("Kaspars".equals(dummyUserFromStorage.getFirstname()));
-        System.out.println("Test passed: " + passed);
-
-        UserDetails fakeUser = userService.get("fake@email.com");
-        if (fakeUser == null) {
-            System.out.println("user not found!!");
-        } else {
-            fakeUser.getFirstname();
+        } catch (FileNotFoundException e) {
+            // called only when exception is thrown
+            System.out.println("File with name " + file.getName() + " not found!");
+        } finally {
+            System.out.println("Close your scanner");
+            if (sc == null) {
+                sc.close();
+            }
         }
 
-        dummyUserFromStorage.setFirstname("RememberMe");
-        dummyUserFromStorage.setLastname("Test");
-        userService.update(dummyUserFromStorage); // U
+        System.out.println("Done with result = GREAT");
 
-        userService.remove("kaspars@rcs.lv"); // D
-
-        System.out.println("DONE!");
-
-       ToDoManager manager = new ToDoManager();
-       List<ToDo> myItems =  manager.getAll(dummy);
-       ToDo todo = myItems.get(0);
-       // todo.setDone();
-       manager.update(dummy, todo);
-       
     }
 
-  
 }
