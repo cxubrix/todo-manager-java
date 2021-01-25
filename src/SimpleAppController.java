@@ -1,104 +1,58 @@
 import java.util.List;
 
-public class SimpleAppController implements AppControllor {
+public class SimpleAppController implements AppController {
 
-    private ToDoManager toDoManager;
-    private UserDetails user;
+	private static AppController instance;
+	private ToDoManager toDoManager;
+	private UserService userService;
 
-    public SimpleAppController(ToDoManager toDoManager, UserDetails user) {
-        this.toDoManager = toDoManager;
-        this.user = user;
-    }
+	private SimpleAppController() {
+		this(new SimpleUserService(), new SimpleToDoManager());
+	}
 
-    @Override
-    public boolean signup(String email, String firstname, String lastname) throws SignUpException {
-        if (email == null) {
-            SignUpException exp = new SignUpException("email is null!!");
-            throw exp;
-        }
-        return false;
-    }
+	protected SimpleAppController(UserService userService, ToDoManager toDoManager) {
+		this.userService = userService;
+		this.toDoManager = toDoManager;
+	}
 
-    @Override
-    public boolean login(String email) {
-        // TODO Auto-generated method stub
-        return false;
-    }
+	@Override
+	public UserDetails signup(String email, String firstname, String lastname) throws SignUpException {
+		if (email == null) {
+			throw new SignUpException("email is null");
+		}
 
-    @Override
-    public void updateProfile(String firstname, String lastname) {
-        // TODO Auto-generated method stub
+		if (userService.get(email) != null) {
+			throw new SignUpException("user with this email already exists");
+		}
 
-    }
+		UserDetails user = new UserDetails(email, firstname, lastname);
+		userService.save(user);
+		return userService.get(email);
+	}
 
-    @Override
-    public void deleteUser(String email) {
-        // TODO Auto-generated method stub
+	@Override
+	public ToDoController login(String email) {
 
-    }
+		UserDetails user = new UserDetails(email);
+		return new SimpleToDoController(toDoManager, user);
+	}
 
-    @Override
-    public List<ToDo> getMyToDos() {
-        return toDoManager.getAll(user);
-    }
+	@Override
+	public void updateProfile(String firstname, String lastname) {
+		// TODO Auto-generated method stub
 
-    @Override
-    public int add(String description) {
-        ToDo todo = new ToDo(description);
-        int id = toDoManager.add(user, todo);
-        toDoManager.add(user, todo);
+	}
 
-        return id;
-    }
+	@Override
+	public void deleteUser(String email) {
 
-    @Override
-    public void deleteToDo(int id) {
-        ToDo toDelete = findById(id);
-        if (toDelete != null) {
-            toDoManager.remove(user, toDelete);
-        }
-    }
+	}
 
-    @Override
-    public void changeStatus(int id, boolean done) {
-        ToDo updatedToDo = findById(id);
-
-        if (updatedToDo != null) {
-            updatedToDo.setDone(done);
-            toDoManager.update(user, updatedToDo);
-        }
-    }
-
-    @Override
-    public void updateToDoDescription(int id, String description) {
-
-        ToDo updatedToDo = findById(id);
-
-        if (updatedToDo != null) {
-            updatedToDo.setTask(description);
-            toDoManager.update(user, updatedToDo);
-        }
-    }
-
-    @Override
-    public ToDo getToDo(int id) {
-        if (id <= 0) {
-            return null;
-        }
-        return findById(id);
-    }
-
-    private ToDo findById(int id) {
-        List<ToDo> allItems = toDoManager.getAll(user);
-
-        for (ToDo item : allItems) { // find todo item by id
-            if (id == item.getId()) {
-                return item;
-            }
-        }
-
-        return null;
-
-    }
+	public static AppController getInstance() { // lazy init singleton
+		if (instance == null) {
+			instance = new SimpleAppController();
+		}
+		return instance;
+	}
 
 }

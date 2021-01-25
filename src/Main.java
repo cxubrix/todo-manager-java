@@ -1,51 +1,51 @@
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
+import java.util.List;
 
 public class Main {
 
-    public static void main(String[] args) {
-        // dependencies
-        ToDoManager todoManager = new SimpleToDoManager();
-        UserDetails user = new UserDetails("info@rcs.lv", "Kaspars", "Test");
-        
-        // app
-        AppControllor controllor = new SimpleAppController(todoManager, user);
-        try {
-            boolean result = controllor.signup(null, "", "");
-        } catch (SignUpException e) {
-            System.err.println("Error: " + e.getMessage());
-        }
-        
-        
-        File file = new File("test.txt");
+	public static void main(String[] args) {
 
-        // try this code
-        // catch errors
-        // always execute
+		// app
+		AppController appController = SimpleAppController.getInstance();
 
-        // other code
-        Scanner sc = null;
-        try {
-            FileInputStream in = new FileInputStream(file);
-            sc = new Scanner(System.in);
+		UserDetails user = null;
+		try {
+			user = appController.signup("test@rcs.lv", "Kaspars", "Test");
+		} catch (SignUpException e) {
+			System.err.println("Error: " + e.getMessage());
+		}
 
-            // ok
-            // work with file if possible
+		// separate todo controller for each user
+		ToDoController todoController = appController.login(user.getEmail());
 
-        } catch (FileNotFoundException e) {
-            // called only when exception is thrown
-            System.out.println("File with name " + file.getName() + " not found!");
-        } finally {
-            System.out.println("Close your scanner");
-            if (sc == null) {
-                sc.close();
-            }
-        }
+		int id0 = todoController.add("Review projects");
+		int id1 = todoController.add("Test app");
+		int id2 = todoController.add("Check gradle");
+		todoController.add("Get some food");
+		todoController.add("Drink more water!");
 
-        System.out.println("Done with result = GREAT");
+		listToDos(todoController.getMyToDos());
 
-    }
+		todoController.deleteToDo(id0);
+		todoController.changeStatus(id1, true);
+		todoController.updateToDoDescription(id2, "Upload presentation");
+
+		listToDos(todoController.getMyToDos());
+
+	}
+
+	private static void listToDos(List<ToDo> myToDos) {
+		System.out.println("-- My ToDo list (" + myToDos.size() + ")------");
+		for (ToDo todo : myToDos) {
+			char state = todo.isDone() ? '√' : ' ';
+			String date = "";
+			if (todo.isDone()) {
+				date = " - " + todo.getFinishedAt().toString();
+			}
+			System.out.println(" " + state + " \t" + todo.getTask() + date);
+		}
+		System.out.println("------------------------");
+		System.out.println();
+
+	}
 
 }
