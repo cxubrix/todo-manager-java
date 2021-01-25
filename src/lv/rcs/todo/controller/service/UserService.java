@@ -1,3 +1,6 @@
+package lv.rcs.todo.controller.service;
+
+import lv.rcs.todo.dto.UserDetails;
 
 public interface UserService {
 

@@ -1,3 +1,4 @@
+package lv.rcs.todo;
 
 public class SignUpException extends Exception {
 

@@ -1,3 +1,8 @@
+package lv.rcs.todo.controller;
+
+import lv.rcs.todo.SignUpException;
+import lv.rcs.todo.dto.UserDetails;
+
 public interface AppController {
 
 	// Main(main method)

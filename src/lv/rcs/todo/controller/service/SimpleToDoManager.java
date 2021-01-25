@@ -1,6 +1,10 @@
+package lv.rcs.todo.controller.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import lv.rcs.todo.dto.ToDo;
+import lv.rcs.todo.dto.UserDetails;
 
 public class SimpleToDoManager implements ToDoManager {
 

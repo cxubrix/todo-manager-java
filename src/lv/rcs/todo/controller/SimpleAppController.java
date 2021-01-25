@@ -1,4 +1,10 @@
-import java.util.List;
+package lv.rcs.todo.controller;
+import lv.rcs.todo.SignUpException;
+import lv.rcs.todo.controller.service.SimpleToDoManager;
+import lv.rcs.todo.controller.service.SimpleUserService;
+import lv.rcs.todo.controller.service.ToDoManager;
+import lv.rcs.todo.controller.service.UserService;
+import lv.rcs.todo.dto.UserDetails;
 
 public class SimpleAppController implements AppController {
 
@@ -26,8 +32,8 @@ public class SimpleAppController implements AppController {
 		}
 
 		UserDetails user = new UserDetails(email, firstname, lastname);
-		userService.save(user);
-		return userService.get(email);
+		userService.save(user); // save
+		return userService.get(email); // read back
 	}
 
 	@Override

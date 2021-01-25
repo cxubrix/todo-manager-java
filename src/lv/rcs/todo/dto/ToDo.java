@@ -1,3 +1,4 @@
+package lv.rcs.todo.dto;
 import java.util.Date;
 
 public class ToDo { // dto

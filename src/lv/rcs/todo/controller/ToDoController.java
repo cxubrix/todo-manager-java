@@ -1,4 +1,7 @@
+package lv.rcs.todo.controller;
 import java.util.List;
+
+import lv.rcs.todo.dto.ToDo;
 
 public interface ToDoController {
 	

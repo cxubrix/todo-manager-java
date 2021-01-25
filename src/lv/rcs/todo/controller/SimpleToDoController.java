@@ -1,4 +1,9 @@
+package lv.rcs.todo.controller;
 import java.util.List;
+
+import lv.rcs.todo.controller.service.ToDoManager;
+import lv.rcs.todo.dto.ToDo;
+import lv.rcs.todo.dto.UserDetails;
 
 public class SimpleToDoController implements ToDoController {
 
