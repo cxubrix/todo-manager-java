@@ -3,6 +3,7 @@ build
 .classpath
 .gradle
 .project
+.settings
 
 # Compiled class file
 *.class
