@@ -1,10 +1,10 @@
 package lv.rcs.todo.controller.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import lv.rcs.todo.dto.ToDo;
@@ -32,7 +32,58 @@ public class SimpleToDoManager implements ToDoManager {
 	// CRUD - in user context, ADD todo
 	@Override
 	public int add(UserDetails user, ToDo todo) {
-		// user exists in map??
+		return addClone(user, todo); // TODO return created resource?
+	}
+
+	public void addAll(UserDetails user, List<ToDo> todos) {
+		for (ToDo todo : todos) {
+			addClone(user, todo); // TODO return created resources?
+		}
+	}
+
+	@Override
+	public ToDo get(UserDetails user, int id) {
+		return getById(user, id);
+	}
+
+	@Override
+	public List<ToDo> getAll(UserDetails user) {
+		if (todos.containsKey(user)) {
+			return Collections.unmodifiableList(todos.get(user));
+		}
+		return Collections.unmodifiableList(Collections.emptyList());
+	}
+
+	@Override
+	public void update(UserDetails user, ToDo todo) {
+
+		ToDo current = getById(user, todo.getId());
+		int currentIndex = todos.get(user).indexOf(current);
+
+		ToDo updated = new ToDo(todo.getId(), todo);
+
+		todos.get(user).set(currentIndex, updated);
+
+	}
+
+	@Override
+	public void remove(UserDetails user, ToDo todo) {
+		ToDo current = getById(user, todo.getId());
+		todos.get(user).remove(current);
+	}
+
+	@Override
+	public void removeAll(UserDetails user) {
+		List<ToDo> usersTodos = todos.get(user);
+		if (usersTodos == null) {
+			return;
+		}
+		// usersTodos.clear();
+		usersTodos = new ArrayList<ToDo>();
+	}
+
+	private int addClone(UserDetails user, ToDo todo) {
+		// user exists in current map?
 		boolean exitingUser = todos.containsKey(user);
 
 		// user has any todos already?? (List exists)
@@ -54,61 +105,10 @@ public class SimpleToDoManager implements ToDoManager {
 		return id;
 	}
 
-	public void addAll(UserDetails user, List<ToDo> todos) {
-		for (ToDo todo : todos) {
-			add(user, todo);
-		}
-	}
-
-	@Override
-	public List<ToDo> getAll(UserDetails user) {
-		return todos.get(user);
-	}
-
-	@Override
-	public ToDo get(UserDetails user, int id) {
-		return getById(user, id);
-	}
-
-	@Override
-	public void update(UserDetails user, ToDo todo) {
-		ToDo original = getById(user, todo.getId());
-		if (original == null) {
-			return;
-		}
-		original.setTask(todo.getTask());
-		original.setDone(todo.isDone());
-		
-	}
-
-	@Override
-	public void remove(UserDetails user, ToDo todo) {
-		List<ToDo> usersTodos = todos.get(user);
-		if (usersTodos == null) {
-			return;
-		}
-
-		if (usersTodos.contains(todo)) {
-			usersTodos.remove(todo);
-		}
-
-		// make it work!!
-	}
-
-	@Override
-	public void removeAll(UserDetails user) {
-		List<ToDo> usersTodos = todos.get(user);
-		if (usersTodos == null) {
-			return;
-		}
-		// usersTodos.clear();
-		usersTodos = new ArrayList<ToDo>();
-	}
-
 	private ToDo getById(UserDetails user, int id) {
-		List<ToDo> usersTodos = todos.get(user);
-		if (usersTodos != null) {
-			for (ToDo todo : usersTodos) {
+		if (user != null && todos.containsKey(user)) {
+			List<ToDo> userTodos = todos.get(user);
+			for (ToDo todo : userTodos) {
 				if (todo.getId() == id) {
 					return todo;
 				}

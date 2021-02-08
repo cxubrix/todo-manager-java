@@ -10,9 +10,9 @@ public interface ToDoManager {
 	// CRUD - in user context, ADD todo
 	int add(UserDetails user, ToDo todo);
 
-	List<ToDo> getAll(UserDetails user);
-
 	ToDo get(UserDetails user, int id);
+
+	List<ToDo> getAll(UserDetails user);
 
 	void update(UserDetails user, ToDo todo);
 

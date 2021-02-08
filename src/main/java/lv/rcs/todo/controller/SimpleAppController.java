@@ -1,4 +1,5 @@
 package lv.rcs.todo.controller;
+
 import lv.rcs.todo.SignUpException;
 import lv.rcs.todo.controller.service.SimpleToDoManager;
 import lv.rcs.todo.controller.service.SimpleUserService;

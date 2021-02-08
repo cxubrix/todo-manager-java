@@ -9,11 +9,10 @@ public class WebUserDetails extends lv.rcs.todo.dto.UserDetails implements UserD
 
 	private static final long serialVersionUID = 1L;
 
-	private String password; // encoded
+	private String password;
 
 	public WebUserDetails(String email, String password) {
-		super(email);
-		this.password = password;
+		this(email, password, null, null);
 	}
 
 	public WebUserDetails(String email, String password, String firstname, String lastname) {
@@ -23,7 +22,7 @@ public class WebUserDetails extends lv.rcs.todo.dto.UserDetails implements UserD
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return null;
+		return null; // roles not used
 	}
 
 	@Override

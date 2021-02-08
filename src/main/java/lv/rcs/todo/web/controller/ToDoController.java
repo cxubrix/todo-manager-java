@@ -1,11 +1,8 @@
 package lv.rcs.todo.web.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,88 +18,90 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.swagger.annotations.ApiParam;
 import lv.rcs.todo.controller.service.ToDoManager;
 import lv.rcs.todo.dto.ToDo;
+import lv.rcs.todo.dto.UserDetails;
 
 @RestController
 @RequestMapping("todo")
-@Scope()
 public class ToDoController implements lv.rcs.todo.controller.ToDoController {
 
+	@Autowired
 	private ToDoManager toDoManager;
 
-	public ToDoController(ToDoManager toDoManager) {
-		this.toDoManager = toDoManager;
-	}
-
-	private ObjectMapper objectMapper;
-
 	@Autowired
-	public void setObjectMapper(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
-	}
+	private ObjectMapper objectMapper;
 
 	@GetMapping("/{id}")
 	public ToDo getToDo(@PathVariable(value = "id") int id) {
-		WebUserDetails user = getAuthentication();
-		return toDoManager.get(user, id);
+		return toDoManager.get(currentUser(), id);
 	}
 
 	@GetMapping
 	@Override
 	public List<ToDo> getMyToDos() {
-		List<ToDo> todos = new ArrayList<ToDo>();
-		todos.add(new ToDo("check"));
-		todos.add(new ToDo("check2"));
-		return todos;
+		return toDoManager.getAll(currentUser());
 	}
 
 	@PostMapping
 	@Override
-	public int add(@RequestBody String payload) {
-		WebUserDetails user = getAuthentication();
-		// Object o = auth.getPrincipal();
+	public int add(@RequestBody @ApiParam(example = "{\n\t\"description\":\"todo task\"\n} ") String payload) {
+		// read todo description from json string(to comply with interface and keep
+		// method signature)
+		String description = readDescription(payload);
 
-		System.out.println("payload: " + payload);
-		String description = null;
-		try {
-			ObjectNode node = objectMapper.readValue(payload, ObjectNode.class);
-			if (node.has("description")) {
-				description = node.get("description").asText();
-
-			}
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-
-		if (description != null) {
-			// toDoManager.add(user, todo)
+		if (description != null) { // add
 			ToDo todo = new ToDo(description);
+			return toDoManager.add(currentUser(), todo);
 		}
+
 		return 0;
 	}
 
 	@DeleteMapping("/{id}")
 	public void deleteToDo(@PathVariable(value = "id") int id) {
-		System.out.println("delete! Id: " + id);
+		ToDo todo = toDoManager.get(currentUser(), id);
+		if (todo != null) {
+			toDoManager.remove(currentUser(), todo);
+		}
 	}
 
-	@PatchMapping("/{id}/{done}")
+	@PatchMapping("/{id}/status")
 	public void changeStatus(@PathVariable(value = "id") int id, @RequestParam(value = "done") boolean done) {
-		System.out.println("patch! Id: " + id + ", done: " + done);
+		ToDo todo = toDoManager.get(currentUser(), id);
+		if (todo != null) {
+			todo.setDone(done);
+			toDoManager.update(currentUser(), todo);
+		}
 	}
 
 	@PatchMapping("/{id}")
-	public void updateToDoDescription(@PathVariable(value = "id") int id, String description) {
-		System.out.println("patch! Id: " + id + ", description: " + description);
+	public void updateToDoDescription(@PathVariable(value = "id") int id,
+			@RequestBody @ApiParam(example = "{\n\t\"description\":\"updated todo task\"\n} ") String payload) {
+		String description = readDescription(payload);
+		if (description != null) {
+			ToDo todo = toDoManager.get(currentUser(), id);
+			todo.setTask(description);
+			toDoManager.update(currentUser(), todo);
+		}
 	}
 
-	private WebUserDetails getAuthentication() {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (auth != null) {
-			return (WebUserDetails) auth.getPrincipal();
+	private UserDetails currentUser() { // used to comply with interface method signature, otherwise can be injected
+		return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	}
+
+	private String readDescription(String payload) { // read 'description' attribute from payload json
+		String description = null;
+		try {
+			ObjectNode node = objectMapper.readValue(payload, ObjectNode.class);
+			if (node.hasNonNull("description")) {
+				description = node.get("description").asText();
+			}
+		} catch (JsonProcessingException e) {
+			e.printStackTrace(); // TODO log
 		}
-		return null;
+		return description;
 	}
 
 }
